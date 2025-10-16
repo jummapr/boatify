@@ -25,8 +25,11 @@ export const add = mutation({
             throw new Error("Missing organization");
         }
 
+        throw new Error("User creation is disabled for now");
+
         const user = await ctx.db.insert("users", {name: args.name});
 
         return user;
     }
 })
+

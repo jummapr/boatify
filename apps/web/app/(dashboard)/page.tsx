@@ -32,11 +32,6 @@ export default function Page() {
             placeholder="Name"
           />
           <Button onClick={onAdd}>Add</Button>
-          <div>
-            {users?.map((user: any) => (
-              <div key={user.id}>{user.name}</div>
-            ))}
-          </div>
         </div>
     </>
   );
