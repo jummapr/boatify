@@ -2,10 +2,8 @@
 import {
   useMutation,
   useQuery,
-  Authenticated,
-  Unauthenticated,
 } from "convex/react";
-import {SignInButton, UserButton} from "@clerk/nextjs"
+import { OrganizationSwitcher, UserButton} from "@clerk/nextjs"
 import { api } from "@workspace/backend/_generated/api";
 import { Button } from "@workspace/ui/components/button";
 import { useState } from "react";
@@ -25,9 +23,9 @@ export default function Page() {
 
   return (
     <>
-      <Authenticated>
         <div className="flex flex-col w-2xl items-center justify-center min-h-svh">
           <UserButton />
+          <OrganizationSwitcher hidePersonal/>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -40,10 +38,6 @@ export default function Page() {
             ))}
           </div>
         </div>
-      </Authenticated>
-      <Unauthenticated>
-        <SignInButton>Sign in</SignInButton>
-      </Unauthenticated>
     </>
   );
 }
