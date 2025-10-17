@@ -23,15 +23,8 @@ export default function Page() {
 
   return (
     <>
-        <div className="flex flex-col w-2xl items-center justify-center min-h-svh">
-          <UserButton />
-          <OrganizationSwitcher hidePersonal/>
-          <Input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Name"
-          />
-          <Button onClick={onAdd}>Add</Button>
+        <div className="">
+          <Button>Add User</Button>
         </div>
     </>
   );
