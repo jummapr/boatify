@@ -1,9 +1,53 @@
 import { ConvexError, v } from "convex/values";
-import { mutation, query } from "../_generated/server";
+import { generateText } from "ai";
+import { action, mutation, query } from "../_generated/server";
 import { components, internal } from "../_generated/api";
 import { supportAgent } from "../system/ai/agents/supportAgent";
 import { paginationOptsValidator } from "convex/server";
 import { saveMessage } from "@convex-dev/agent";
+import { google } from "@ai-sdk/google";
+
+export const enhanceResponse = action({
+  args: {
+    prompt: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (identity === null) {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "Identity not found",
+      });
+    }
+
+    const orgId = identity.orgId as string;
+
+    if (!orgId) {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "Organization not found",
+      });
+    }
+
+    const response = await generateText({
+      model: google.chat("gemini-2.5-flash"),
+      messages: [
+        {
+          role: "system",
+          content:
+            "Enhance the user messages to be more professional, clear, and helpful maintaining their intent and key information. don't provide me options or anything, just give me enhance message that's it. don't repeat the same message, don't add anything to the message, just enhance it.",
+        },
+        {
+          role: "user",
+          content: args.prompt,
+        },
+      ],
+    });
+
+    return response.text
+  },
+});
 
 export const create = mutation({
   args: {
@@ -60,10 +104,8 @@ export const create = mutation({
       message: {
         role: "assistant",
         content: args.prompt,
-      } 
+      },
     });
-
-
   },
 });
 
@@ -91,9 +133,12 @@ export const getMany = query({
       });
     }
 
-    const conversation = await ctx.db.query("conversations").withIndex("by_thread_id", (q) => q.eq("threadId", args.threadId)).unique();
+    const conversation = await ctx.db
+      .query("conversations")
+      .withIndex("by_thread_id", (q) => q.eq("threadId", args.threadId))
+      .unique();
 
-    if(!conversation) {
+    if (!conversation) {
       throw new ConvexError({
         code: "NOT_FOUND",
         message: "Conversation not found",

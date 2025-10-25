@@ -3,6 +3,8 @@ import { action, query } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { supportAgent } from "../system/ai/agents/supportAgent";
 import { paginationOptsValidator } from "convex/server";
+import { escalatedConversation } from "../system/ai/tools/escalatedConversation";
+import { resolveConversation } from "../system/ai/tools/resolveConversation";
 
 export const create = action({
   args: {
@@ -49,40 +51,52 @@ export const create = action({
     }
 
     // TODO: implement subscription checks
+    const shouldTriggerAgent = conversation.status === "unresolved";
 
-    await supportAgent.generateText(
-      ctx,
-      {
+    if (shouldTriggerAgent) {
+      await supportAgent.generateText(
+        ctx,
+        {
+          threadId: args.threadId,
+        },
+        {
+          prompt: args.prompt,
+          tools: {
+            escalatedConversation,
+            resolveConversation,
+          },
+        }
+      );
+    } else {
+      await supportAgent.saveMessage(ctx, {
         threadId: args.threadId,
-      },
-      {
         prompt: args.prompt,
-      }
-    );
+      });
+    }
   },
 });
 
 export const getMany = query({
-    args: {
-        threadId: v.string(),
-        paginationOpts: paginationOptsValidator,
-        contactSessionId: v.id("contactSessions")
-    }, 
-    handler: async (ctx, args) => {
-        const contactSession = await ctx.db.get(args.contactSessionId);
+  args: {
+    threadId: v.string(),
+    paginationOpts: paginationOptsValidator,
+    contactSessionId: v.id("contactSessions"),
+  },
+  handler: async (ctx, args) => {
+    const contactSession = await ctx.db.get(args.contactSessionId);
 
-        if (!contactSession || contactSession.expiresAt < Date.now()) {
-            throw new ConvexError({
-                code: "UNAUTHORIZED",
-                message: "Invalid session",
-            });
-        };
+    if (!contactSession || contactSession.expiresAt < Date.now()) {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "Invalid session",
+      });
+    }
 
-        const paginated = await supportAgent.listMessages(ctx, {
-            threadId: args.threadId,
-            paginationOpts: args.paginationOpts,
-        });
+    const paginated = await supportAgent.listMessages(ctx, {
+      threadId: args.threadId,
+      paginationOpts: args.paginationOpts,
+    });
 
-        return paginated;
-    },
+    return paginated;
+  },
 });
