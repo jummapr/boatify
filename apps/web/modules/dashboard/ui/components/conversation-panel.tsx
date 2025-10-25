@@ -191,7 +191,7 @@ export const SkeletonConversations = () => {
       <div className="relative flex w-full min-w-0 flex-col p-2">
         <div className="w-full space-y-2">
           {Array.from({ length: 8 }).map((_, index) => (
-            <div className="flex items-start gap-3 rounded-lg p-4">
+            <div key={index} className="flex items-start gap-3 rounded-lg p-4">
               <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
               <div className="min-w-0 flex-1 ">
                 <div className="flex w-full items-center gap-2">
