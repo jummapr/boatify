@@ -17,7 +17,7 @@ export const create = action({
       internal.system.contactSession.getOne,
       {
         contactSessionId: args.contactSessionId,
-      }
+      },
     );
 
     if (!contactSession || contactSession.expiresAt < Date.now()) {
@@ -31,7 +31,7 @@ export const create = action({
       internal.system.conversations.getByThreadId,
       {
         threadId: args.threadId,
-      }
+      },
     );
 
     console.log(conversation);
@@ -65,7 +65,7 @@ export const create = action({
             escalatedConversation,
             resolveConversation,
           },
-        }
+        },
       );
     } else {
       await supportAgent.saveMessage(ctx, {
