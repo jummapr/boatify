@@ -6,6 +6,7 @@ import { supportAgent } from "../system/ai/agents/supportAgent";
 import { paginationOptsValidator } from "convex/server";
 import { saveMessage } from "@convex-dev/agent";
 import { google } from "@ai-sdk/google";
+import { OPERATOR_MESSAGE_ENHANCEMENT_PROMPT } from "../system/ai/constant";
 
 export const enhanceResponse = action({
   args: {
@@ -35,8 +36,7 @@ export const enhanceResponse = action({
       messages: [
         {
           role: "system",
-          content:
-            "Enhance the user messages to be more professional, clear, and helpful maintaining their intent and key information. don't provide me options or anything, just give me enhance message that's it. don't repeat the same message, don't add anything to the message, just enhance it.",
+          content: OPERATOR_MESSAGE_ENHANCEMENT_PROMPT,
         },
         {
           role: "user",
