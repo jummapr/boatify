@@ -24,7 +24,7 @@ function guessMimeType(filename: string, bytes: ArrayBuffer): string {
 
 export const deleteFile = mutation({
   args: {
-    entryId: vEntryId
+    entryId: vEntryId,
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -46,7 +46,7 @@ export const deleteFile = mutation({
     }
 
     const namespace = await rag.getNamespace(ctx, {
-      namespace: orgId
+      namespace: orgId,
     });
 
     if (!namespace) {
@@ -54,10 +54,10 @@ export const deleteFile = mutation({
         code: "UNAUTHORIZED",
         message: "Invalid namespace",
       });
-    };
+    }
 
     const entry = await rag.getEntry(ctx, {
-      entryId: args.entryId
+      entryId: args.entryId,
     });
 
     if (!entry) {
@@ -65,14 +65,14 @@ export const deleteFile = mutation({
         code: "NOT_FOUND",
         message: "Entry not found",
       });
-    };
+    }
 
     if (entry.metadata?.uploadedBy !== orgId) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
         message: "Invalid organization Id",
       });
-    };
+    }
 
     if (entry.metadata?.storageId) {
       await ctx.storage.delete(entry.metadata.storageId as Id<"_storage">);
@@ -81,8 +81,8 @@ export const deleteFile = mutation({
     await rag.deleteAsync(ctx, {
       entryId: args.entryId,
     });
-  }
-})
+  },
+});
 
 export const addFile = action({
   args: {
@@ -90,6 +90,7 @@ export const addFile = action({
     mimeType: v.string(),
     bytes: v.bytes(),
     category: v.optional(v.string()),
+    bystesLength: v.number(),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -155,7 +156,7 @@ export const list = query({
   // and pagination options for loading data in chunks.
   args: {
     category: v.optional(v.string()),
-    paginationOpts: paginationOptsValidator
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -181,7 +182,7 @@ export const list = query({
     // 'rag' likely stands for Retrieval-Augmented Generation, suggesting these files
     // might be used with an AI or search system. The orgId is used as the namespace.
     const namespace = await rag.getNamespace(ctx, {
-      namespace: orgId
+      namespace: orgId,
     });
 
     if (!namespace) {
@@ -189,32 +190,34 @@ export const list = query({
       return {
         page: [],
         isDone: true,
-        continueCursor: ""
-      }
+        continueCursor: "",
+      };
     }
 
     // 4. List Internal Records: It fetches the raw file records ('Entry' objects)
     // from the RAG system for the given namespace.
     const results = await rag.list(ctx, {
       namespaceId: namespace.namespaceId,
-      paginationOpts: args.paginationOpts
+      paginationOpts: args.paginationOpts,
     });
 
     // 5. Data Transformation: It takes the list of raw 'Entry' objects and,
     // for each one, calls the 'convertEntryToPublicFile' function to create
     // a clean, public-facing file object.
     const files = await Promise.all(
-      results.page.map((entry) => convertEntryToPublicFile(ctx, entry))
+      results.page.map((entry) => convertEntryToPublicFile(ctx, entry)),
     );
 
-    const filteredFiles = args.category ? files.filter((file) => file.category === args.category) : files;
+    const filteredFiles = args.category
+      ? files.filter((file) => file.category === args.category)
+      : files;
 
     return {
       page: filteredFiles,
       isDone: results.isDone,
-      continueCursor: results.continueCursor
-    }
-  }
+      continueCursor: results.continueCursor,
+    };
+  },
 });
 
 export type PublicFile = {
@@ -225,17 +228,18 @@ export type PublicFile = {
   status: "ready" | "processing" | "error";
   url: string | null;
   category?: string;
-}
+};
 
 type EntryMetaData = {
   storageId: Id<"_storage">;
   uploadedBy: string;
   filename: string;
-  category: string | null
-}
+  category: string | null;
+};
 
-async function convertEntryToPublicFile(ctx: QueryCtx,
-  entry: Entry
+async function convertEntryToPublicFile(
+  ctx: QueryCtx,
+  entry: Entry,
 ): Promise<PublicFile> {
   // Gets metadata stored with the file, like its storageId and original filename.
   const metaData = entry.metadata as EntryMetaData | undefined;
@@ -282,9 +286,9 @@ async function convertEntryToPublicFile(ctx: QueryCtx,
     size: fileSize,
     status,
     url,
-    category: metaData?.category || undefined
-  }
-};
+    category: metaData?.category || undefined,
+  };
+}
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) {

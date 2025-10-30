@@ -64,9 +64,9 @@ async function extractTextFileContent(
   mimeType: string,
 ) {
   const arrayBuffer =
-    bytes || (await (await ctx.storage.get(storageId))?.arrayBuffer);
+    bytes || (await (await ctx.storage.get(storageId))?.arrayBuffer());
 
-  if (arrayBuffer) {
+  if (!arrayBuffer) {
     throw new Error("Failed to get file content");
   }
 
