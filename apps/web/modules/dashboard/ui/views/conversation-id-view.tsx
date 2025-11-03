@@ -52,7 +52,7 @@ const ConversationIdView = ({
   const messages = useThreadMessages(
     api.private.messages.getMany,
     conversation?.threadId ? { threadId: conversation?.threadId } : "skip",
-    { initialNumItems: 10 }
+    { initialNumItems: 10 },
   );
 
   const { topElementRef, handleLoadMore, isLoadingMore, canLoadMore } =
@@ -104,7 +104,7 @@ const ConversationIdView = ({
 
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const updateConversationStatus = useMutation(
-    api.private.conversations.updateStatus
+    api.private.conversations.updateStatus,
   );
   const handleToggleStatus = async () => {
     if (!conversation) {
@@ -168,7 +168,8 @@ const ConversationIdView = ({
               key={message.id}
             >
               <AIMessageContent>
-                <AIResponse>{message.content}</AIResponse>
+                {/* @ts-ignore */}
+                <AIResponse>{message?.content}</AIResponse>
               </AIMessageContent>
               {message.role === "user" && (
                 <DiceBearAvatar
@@ -193,7 +194,8 @@ const ConversationIdView = ({
                 <AIInputTextarea
                   disabled={
                     conversation?.status === "resolved" ||
-                    form.formState.isSubmitting || isEnhancingResponse
+                    form.formState.isSubmitting ||
+                    isEnhancingResponse
                   }
                   onChange={field.onChange}
                   onKeyDown={(e) => {
@@ -229,7 +231,8 @@ const ConversationIdView = ({
                 disabled={
                   conversation?.status === "resolved" ||
                   !form.formState.isValid ||
-                  form.formState.isSubmitting || isEnhancingResponse
+                  form.formState.isSubmitting ||
+                  isEnhancingResponse
                 }
                 status="ready"
                 type="submit"
@@ -253,39 +256,42 @@ export const ConversationIdViewLoading = () => {
 
       <AIConversation className="max-h-[calc(100vh-180px)]">
         <AIConversationContent>
-          {Array.from({length: 10}, (_,index) => {
+          {Array.from({ length: 10 }, (_, index) => {
             const isUser = index % 2 === 0;
-            const widths = ["w-48","w-60", "w-72"];
+            const widths = ["w-48", "w-60", "w-72"];
             const width = widths[index % widths.length];
 
             return (
-              <div className={cn(
-                "group flex w-full items-end justify-end gap-2 py-2 [&>div]:max-w-[80%]",
-                isUser ? "is-user" : "is-assistant flex-row-reverse"
-                
-              )} key={index}> 
-                <Skeleton className={`h-9 ${width} rounded-lg bg-neutral-200`}/>
-                <Skeleton className="size-8 rounded-full bg-neutral-200"/>
+              <div
+                className={cn(
+                  "group flex w-full items-end justify-end gap-2 py-2 [&>div]:max-w-[80%]",
+                  isUser ? "is-user" : "is-assistant flex-row-reverse",
+                )}
+                key={index}
+              >
+                <Skeleton
+                  className={`h-9 ${width} rounded-lg bg-neutral-200`}
+                />
+                <Skeleton className="size-8 rounded-full bg-neutral-200" />
               </div>
-            )
+            );
           })}
         </AIConversationContent>
       </AIConversation>
       <div className="p-2 ">
-          <AIInput>
-            <AIInputTextarea 
-              disabled
-              placeholder="Type your response as an operator..."
-            />
-            <AIInputToolbar>
-              <AIInputTools />
-              <AIInputSubmit disabled status="ready" />
-            </AIInputToolbar>
-          </AIInput>
+        <AIInput>
+          <AIInputTextarea
+            disabled
+            placeholder="Type your response as an operator..."
+          />
+          <AIInputToolbar>
+            <AIInputTools />
+            <AIInputSubmit disabled status="ready" />
+          </AIInputToolbar>
+        </AIInput>
       </div>
     </div>
   );
 };
-
 
 export default ConversationIdView;

@@ -49,7 +49,7 @@ export const WidgetChatScreen = () => {
   const conversationId = useAtomValue(conversationIdAtom);
   const organizationId = useAtomValue(organizationIdAtom);
   const contactSessionId = useAtomValue(
-    contactSessionIdFamily(organizationId || "")
+    contactSessionIdFamily(organizationId || ""),
   );
 
   const onBack = () => {
@@ -64,7 +64,7 @@ export const WidgetChatScreen = () => {
           conversationId,
           contactSessionId,
         }
-      : "skip"
+      : "skip",
   );
 
   // console.log("Conversation", conversation);
@@ -77,7 +77,7 @@ export const WidgetChatScreen = () => {
           contactSessionId: contactSessionId,
         }
       : "skip",
-    { initialNumItems: 10 }
+    { initialNumItems: 10 },
   );
 
   const { topElementRef, handleLoadMore, isLoadingMore, canLoadMore } =
@@ -124,7 +124,7 @@ export const WidgetChatScreen = () => {
 
       <AIConversation>
         <AIConversationContent>
-          <InfiniteScrollTrigger 
+          <InfiniteScrollTrigger
             canLoadMore={canLoadMore}
             isLoadingMore={isLoadingMore}
             onLoadMore={handleLoadMore}
@@ -137,10 +137,11 @@ export const WidgetChatScreen = () => {
                 key={message.id}
               >
                 <AIMessageContent>
-                  <AIResponse>{message.content}</AIResponse>
+                  {/* @ts-ignore */}
+                  <AIResponse>{message?.content}</AIResponse>
                 </AIMessageContent>
                 {message.role === "assistant" && (
-                  <DiceBearAvatar 
+                  <DiceBearAvatar
                     imageUrl="/logo.svg"
                     seed="assistant"
                     size={32}
