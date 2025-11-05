@@ -1,18 +1,18 @@
 import { mutation, query } from "../_generated/server";
 import { ConvexError, v } from "convex/values";
 import { supportAgent } from "../system/ai/agents/supportAgent";
-import { MessageDoc} from "@convex-dev/agent";
+import { MessageDoc } from "@convex-dev/agent";
 import { paginationOptsValidator, PaginationResult } from "convex/server";
 import { Doc } from "../_generated/dataModel";
 
 export const updateStatus = mutation({
-  args:{
+  args: {
     conversationId: v.id("conversations"),
     status: v.union(
       v.literal("unresolved"),
       v.literal("escalated"),
-      v.literal("resolved")
-    )
+      v.literal("resolved"),
+    ),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -50,14 +50,14 @@ export const updateStatus = mutation({
     }
 
     await ctx.db.patch(args.conversationId, {
-      status: args.status
+      status: args.status,
     });
-  }
-})
+  },
+});
 
 export const getOne = query({
   args: {
-    conversationId: v.id("conversations")
+    conversationId: v.id("conversations"),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -96,19 +96,19 @@ export const getOne = query({
 
     const contactSession = await ctx.db.get(conversation.contactSessionId);
 
-    if(!contactSession) {
+    if (!contactSession) {
       throw new ConvexError({
         code: "NOT_FOUND",
         message: "Contact session not found",
       });
-    };
+    }
 
     return {
       ...conversation,
-      contactSession
-    }
-  }
-})
+      contactSession,
+    };
+  },
+});
 
 export const getMany = query({
   args: {
@@ -117,8 +117,8 @@ export const getMany = query({
       v.union(
         v.literal("unresolved"),
         v.literal("escalated"),
-        v.literal("resolved")
-      )
+        v.literal("resolved"),
+      ),
     ),
   },
   handler: async (ctx, args) => {
@@ -148,7 +148,7 @@ export const getMany = query({
         .withIndex("by_status_and_organization_id", (q) =>
           q
             .eq("status", args.status as Doc<"conversations">["status"])
-            .eq("organizationId", orgId)
+            .eq("organizationId", orgId),
         )
         .order("desc")
         .paginate(args.paginationOpts);
@@ -187,11 +187,11 @@ export const getMany = query({
           lastMessage,
           contactSession,
         };
-      })
+      }),
     );
 
     const validConversations = conversationWithAdditionalData.filter(
-      (conv): conv is NonNullable<typeof conv> => conv !== null
+      (conv): conv is NonNullable<typeof conv> => conv !== null,
     );
 
     return {
