@@ -13,7 +13,6 @@ import { useVapi } from "@/modules/widget/hooks/use-vapi";
 import { WidgetHeader } from "@/modules/widget/ui/components/widget-header";
 import { useSetAtom } from "jotai";
 import { screenAtom } from "../../atoms/widget-atom";
-import { WidgetFooter } from "../components/widget-footer";
 import { cn } from "@workspace/ui/lib/utils";
 
 export const WidgetVoiceScreen = () => {
@@ -42,7 +41,7 @@ export const WidgetVoiceScreen = () => {
         </div>
       </WidgetHeader>
       {transcript.length > 0 ? (
-        <AIConversation className="h-full flex-1 ">
+        <AIConversation className="h-full">
           <AIConversationContent>
             {transcript.map((message, index) => (
               <AIMessage
