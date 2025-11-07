@@ -51,8 +51,21 @@ export const create = action({
       });
     }
 
-    // TODO: implement subscription checks
-    const shouldTriggerAgent = conversation.status === "unresolved";
+    // this refreshes the user's session if they are within the threshold
+    await ctx.runMutation(internal.system.contactSession.refresh, {
+      contactSessionId: args.contactSessionId,
+    });
+
+    const subscriptions = await ctx.runQuery(
+      internal.system.subscriptions.getByOrganizationId,
+      {
+        organizationId: conversation.organizationId,
+      },
+    );
+
+    const shouldTriggerAgent =
+      conversation.status === "unresolved" &&
+      subscriptions?.status === "active";
 
     if (shouldTriggerAgent) {
       await supportAgent.generateText(
